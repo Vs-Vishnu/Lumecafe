@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --color-brand-light: #F0FDF4;
+  --color-brand: #10B981;
+  --color-brand-dark: #047857;
+  --color-accent-light: #FEF3C7;
+  --color-accent: #F59E0B;
+  --color-accent-dark: #D97706;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F9FAFB;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Print styles for receipt invoice (80mm width) */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  /* Hide everything else */
+  body > div:not(#printable-receipt-root) {
+    display: none !important;
+  }
+
+  #printable-receipt-root {
+    display: block !important;
+    width: 80mm;
+    margin: 0 auto;
+    padding: 4mm;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+  }
+
+  /* Force print background */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+}
