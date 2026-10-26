@@ -45,24 +45,48 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     navigate('/login');
   };
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: 'Billing', path: '/billing', icon: <Receipt className="w-5 h-5" /> },
-    { name: 'Products', path: '/products', icon: <ShoppingBag className="w-5 h-5" /> },
-    { name: 'Categories', path: '/categories', icon: <Tags className="w-5 h-5" /> },
-    { name: 'Inventory', path: '/inventory', icon: <Package className="w-5 h-5" /> },
-    { name: 'Customers', path: '/customers', icon: <Users className="w-5 h-5" /> },
-    { name: 'Orders', path: '/orders', icon: <ClipboardList className="w-5 h-5" /> },
-    { name: 'Expenses', path: '/expenses', icon: <TrendingDown className="w-5 h-5" /> },
-    { name: 'Reports', path: '/reports', icon: <BarChart2 className="w-5 h-5" /> },
-  ];
+  const getNavItems = () => {
+    if (user?.role === 'customer') {
+      return [
+        { name: 'Browse Menu', path: '/menu', icon: <ShoppingBag className="w-5 h-5" /> },
+        { name: 'My Orders', path: '/my-orders', icon: <ClipboardList className="w-5 h-5" /> },
+        { name: 'Saved Addresses', path: '/addresses', icon: <Package className="w-5 h-5" /> },
+      ];
+    }
+
+    if (user?.role === 'delivery_partner') {
+      return [
+        { name: 'Delivery Console', path: '/delivery/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+      ];
+    }
+
+    // Cashier and Admin base items
+    const baseItems = [
+      { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+      { name: 'Billing', path: '/billing', icon: <Receipt className="w-5 h-5" /> },
+      { name: 'Products', path: '/products', icon: <ShoppingBag className="w-5 h-5" /> },
+      { name: 'Categories', path: '/categories', icon: <Tags className="w-5 h-5" /> },
+      { name: 'Inventory', path: '/inventory', icon: <Package className="w-5 h-5" /> },
+      { name: 'Customers', path: '/customers', icon: <Users className="w-5 h-5" /> },
+      { name: 'Orders', path: '/orders', icon: <ClipboardList className="w-5 h-5" /> },
+      { name: 'Delivery Fleet', path: '/admin/delivery-partners', icon: <UserCheck className="w-5 h-5" /> },
+      { name: 'Delivery Assignments', path: '/admin/delivery-assignments', icon: <Package className="w-5 h-5" /> },
+      { name: 'Expenses', path: '/expenses', icon: <TrendingDown className="w-5 h-5" /> },
+      { name: 'Reports', path: '/reports', icon: <BarChart2 className="w-5 h-5" /> },
+    ];
+
+    if (user?.role === 'cashier') {
+      return baseItems.filter((item) => ['Billing', 'Customers', 'Orders', 'Expenses'].includes(item.name));
+    }
+
+    return baseItems;
+  };
 
   const adminItems = [
     { name: 'Cashiers', path: '/users', icon: <UserCheck className="w-5 h-5" /> },
     { name: 'Settings', path: '/settings', icon: <Settings className="w-5 h-5" /> },
     { name: '🤖 AI Business Insights', path: '/settings?tab=ai-insights', icon: <Sparkles className="w-5 h-5 text-amber-500" /> },
   ];
-
 
   const activeStyle = 'bg-brand text-white shadow-lg shadow-brand/20';
   const inactiveStyle = 'text-gray-600 hover:bg-green-50 hover:text-brand';
@@ -94,12 +118,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <div className="flex-grow overflow-y-auto px-4 py-4 space-y-7">
         <div>
           <span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
-            Main Menu
+            {user?.role === 'customer' ? 'Customer Portal' : user?.role === 'delivery_partner' ? 'Driver Console' : 'Main Menu'}
           </span>
           <nav className="space-y-1">
-            {navItems
-              .filter(item => user?.role === 'admin' || item.name === 'Billing')
-              .map((item) => (
+            {getNavItems().map((item) => (
               <NavLink
                 key={item.name}
                 to={item.path}
@@ -115,7 +137,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </NavLink>
             ))}
           </nav>
-
         </div>
 
         {user?.role === 'admin' && (

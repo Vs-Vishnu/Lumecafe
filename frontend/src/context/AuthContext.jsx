@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     }
     try {
       const response = await api.get('/auth/me');
-      if (response.data.success) {
+      if (response.data.success && response.data.user) {
         setUser(response.data.user);
       } else {
         localStorage.removeItem('token');
@@ -52,18 +52,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
-  // Register (setup) handler
-  const register = async (name, email, password, role = 'cashier') => {
+  // Google OAuth handler
+  const googleLogin = async (payload) => {
     try {
-      const response = await api.post('/auth/register', { name, email, password, role });
+      const response = await api.post('/auth/google', payload);
       if (response.data.success) {
-        // If it returns a token (e.g. first admin setup), we log in immediately
+        localStorage.setItem('token', response.data.token);
+        setUser(response.data.user);
+        return { success: true, user: response.data.user };
+      }
+      return { success: false, message: 'Google sign-in failed' };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Google sign-in error.';
+      return { success: false, message };
+    }
+  };
+
+  // Authenticate directly with token (used after invitation activation)
+  const authenticateWithToken = (token, userData) => {
+    localStorage.setItem('token', token);
+    setUser(userData);
+  };
+
+  // Register handler
+  const register = async (name, email, password, phone = '', role = 'customer') => {
+    try {
+      const response = await api.post('/auth/register', { name, email, password, phone, role });
+      if (response.data.success) {
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
           setUser(response.data.user);
         }
-        return { success: true };
+        return { success: true, user: response.data.user, message: response.data.message };
       }
       return { success: false, message: 'Registration failed' };
     } catch (error) {
@@ -79,15 +99,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Update profile handler
-  const updateProfile = async (name, email, password) => {
+  const updateProfile = async (name, email, phone, password) => {
     try {
       const data = { name, email };
+      if (phone !== undefined) data.phone = phone;
       if (password) data.password = password;
-      
+
       const response = await api.put('/auth/profile', data);
       if (response.data.success) {
         setUser(response.data.user);
-        return { success: true };
+        return { success: true, message: response.data.message };
       }
       return { success: false, message: 'Profile update failed' };
     } catch (error) {
@@ -96,16 +117,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const isAdmin = user?.role === 'admin';
+  const isDeliveryPartner = user?.role === 'delivery_partner';
+  const isCustomer = user?.role === 'customer';
+  const isCashier = user?.role === 'cashier';
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
         login,
+        googleLogin,
+        authenticateWithToken,
         logout,
         register,
         updateProfile,
         refreshUser: fetchCurrentUser,
+        isAdmin,
+        isDeliveryPartner,
+        isCustomer,
+        isCashier,
       }}
     >
       {children}

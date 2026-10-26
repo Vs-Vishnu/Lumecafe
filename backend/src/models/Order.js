@@ -106,8 +106,80 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Completed', 'Cancelled', 'Refunded'],
+      enum: ['Completed', 'Cancelled', 'Refunded', 'In Progress', 'Pending'],
       default: 'Completed',
+    },
+    orderType: {
+      type: String,
+      enum: ['dine_in', 'takeaway', 'delivery'],
+      default: 'dine_in',
+      index: true,
+    },
+    deliveryStatus: {
+      type: String,
+      enum: [
+        'order_placed',
+        'confirmed',
+        'preparing',
+        'ready_for_dispatch',
+        'assigned',
+        'picked_up',
+        'out_for_delivery',
+        'delivered',
+        'cancelled',
+      ],
+      default: null,
+      index: true,
+    },
+    customerUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+      index: true,
+    },
+    deliveryAddress: {
+      fullName: { type: String, default: '' },
+      phone: { type: String, default: '' },
+      houseNumber: { type: String, default: '' },
+      streetName: { type: String, default: '' },
+      area: { type: String, default: '' },
+      city: { type: String, default: '' },
+      district: { type: String, default: '' },
+      state: { type: String, default: '' },
+      postalCode: { type: String, default: '' },
+      landmark: { type: String, default: '' },
+      deliveryInstructions: { type: String, default: '' },
+      coordinates: {
+        latitude: { type: Number, default: null },
+        longitude: { type: Number, default: null },
+      },
+    },
+    deliveryPartner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+      index: true,
+    },
+    deliveryAssignment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'DeliveryAssignment',
+      default: null,
+    },
+    deliveryConfirmationCode: {
+      type: String,
+      default: null,
+    },
+    estimatedDeliveryMinutes: {
+      type: Number,
+      default: 30,
+    },
+    pickedUpAt: {
+      type: Date,
+      default: null,
+    },
+    deliveredAt: {
+      type: Date,
+      default: null,
     },
     notes: {
       type: String,
@@ -115,7 +187,7 @@ const orderSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ['billing', 'excel_import'],
+      enum: ['billing', 'excel_import', 'customer_portal'],
       default: 'billing',
     },
     importBatch: {

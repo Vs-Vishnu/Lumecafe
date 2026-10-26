@@ -16,6 +16,12 @@ const userRoutes = require('./routes/userRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const discountRoutes = require('./routes/discountRoutes');
+const deliveryInvitationRoutes = require('./routes/deliveryInvitationRoutes');
+const adminDeliveryPartnerRoutes = require('./routes/adminDeliveryPartnerRoutes');
+const deliveryAssignmentRoutes = require('./routes/deliveryAssignmentRoutes');
+const deliveryPartnerRoutes = require('./routes/deliveryPartnerRoutes');
+const customerPortalRoutes = require('./routes/customerPortalRoutes');
+const mapRoutes = require('./routes/mapRoutes');
 
 const healthRoutes = require('./routes/healthRoutes');
 
@@ -28,7 +34,7 @@ app.use(express.urlencoded({ limit: '15mb', extended: true }));
 // Enable CORS
 app.use(cors({
   origin: '*', // Allow all origins for this project setup
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -51,6 +57,14 @@ app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin/analytics', analyticsRoutes);
 app.use('/api/discounts', discountRoutes);
+
+// Customer and Delivery Partner Management routers
+app.use('/api/delivery-invitations', deliveryInvitationRoutes);
+app.use('/api/admin/delivery-partners', adminDeliveryPartnerRoutes);
+app.use('/api/admin/delivery-assignments', deliveryAssignmentRoutes);
+app.use('/api/delivery-partner', deliveryPartnerRoutes);
+app.use('/api/customer', customerPortalRoutes);
+app.use('/api/maps', mapRoutes);
 
 // 404 Route handler
 app.use((req, res, next) => {

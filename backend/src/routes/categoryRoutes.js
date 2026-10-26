@@ -4,9 +4,9 @@ const { getCategories, createCategory, updateCategory, deleteCategory } = requir
 const { protect } = require('../middleware/auth');
 const { restrictTo } = require('../middleware/role');
 
-router.use(protect);
-
 router.get('/', getCategories);
+
+router.use(protect);
 router.post('/', restrictTo('admin'), createCategory);
 router.put('/:id', restrictTo('admin'), updateCategory);
 router.delete('/:id', restrictTo('admin'), deleteCategory);
