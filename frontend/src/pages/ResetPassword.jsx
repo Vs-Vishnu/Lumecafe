@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { KeyRound, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
@@ -7,8 +7,17 @@ import Toast from '../components/Toast';
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const role = searchParams.get('role');
   const navigate = useNavigate();
 
+  // If role is explicitly delivery_partner, redirect to dedicated Delivery Partner reset page
+  useEffect(() => {
+    if (role === 'delivery_partner') {
+      navigate(`/delivery-partner/reset-password?${searchParams.toString()}`, { replace: true });
+    }
+  }, [role, searchParams, navigate]);
+
+  const [otpOrToken, setOtpOrToken] = useState(token || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,8 +29,10 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!token) {
-      setToastMsg('Invalid password reset link. No token provided.');
+    const activeSecret = token || otpOrToken.trim();
+
+    if (!activeSecret) {
+      setToastMsg('Invalid password reset link. No token or OTP code provided.');
       setToastType('error');
       return;
     }
@@ -40,15 +51,32 @@ const ResetPassword = () => {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/reset-password', { token, password });
-      if (response.data.success) {
+      // First try standard auth endpoint; if 400 and looks like delivery partner, try delivery partner endpoint
+      let response;
+      try {
+        response = await api.post('/auth/reset-password', {
+          token: activeSecret,
+          password,
+        });
+      } catch (authErr) {
+        // Fallback try delivery partner reset if standard returned 400
+        const isOtp = /^\d{6}$/.test(activeSecret);
+        response = await api.post('/delivery-partner/auth/reset-password', {
+          token: isOtp ? undefined : activeSecret,
+          otp: isOtp ? activeSecret : undefined,
+          password,
+          confirmPassword,
+        });
+      }
+
+      if (response && response.data.success) {
         setSuccess(true);
         setToastMsg('Password updated successfully! You can now log in.');
         setToastType('success');
-        setTimeout(() => navigate('/login'), 2000);
+        setTimeout(() => navigate('/login'), 1800);
       }
     } catch (err) {
-      setToastMsg(err.response?.data?.message || 'Password reset failed. The link may have expired.');
+      setToastMsg(err.response?.data?.message || 'Password reset failed. The link or code may have expired.');
       setToastType('error');
     } finally {
       setLoading(false);
@@ -84,6 +112,25 @@ const ResetPassword = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {!token && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700">Reset Token or 6-Digit OTP *</label>
+                  <div className="mt-1 relative rounded-xl shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                      <KeyRound className="h-4.5 w-4.5" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={otpOrToken}
+                      onChange={(e) => setOtpOrToken(e.target.value)}
+                      placeholder="Enter verification code or token"
+                      className="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-gray-700">New Password *</label>
                 <div className="mt-1 relative rounded-xl shadow-sm">
@@ -136,6 +183,15 @@ const ResetPassword = () => {
               </button>
             </form>
           )}
+
+          <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs">
+            <Link to="/forgot-password" className="text-gray-500 hover:text-gray-700 font-semibold">
+              Request new code
+            </Link>
+            <Link to="/login" className="text-brand hover:text-brand-dark font-bold">
+              Back to Login
+            </Link>
+          </div>
         </div>
       </div>
     </div>

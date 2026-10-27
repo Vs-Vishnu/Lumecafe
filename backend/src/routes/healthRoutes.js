@@ -22,4 +22,15 @@ router.get('/', (req, res) => {
   });
 });
 
+// @desc    Diagnostic email logs (dev / test only)
+// @route   GET /api/health/emails
+// @access  Public (dev only)
+router.get('/emails', (req, res) => {
+  const { getSentEmailsLog } = require('../services/emailService');
+  return res.status(200).json({
+    success: true,
+    data: getSentEmailsLog(),
+  });
+});
+
 module.exports = router;

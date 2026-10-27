@@ -23,6 +23,8 @@ import Settings from './pages/Settings';
 // New Customer, Delivery Partner & Invitation Pages
 import AcceptInvitation from './pages/AcceptInvitation';
 import ResetPassword from './pages/ResetPassword';
+import DeliveryPartnerForgotPassword from './pages/DeliveryPartnerForgotPassword';
+import DeliveryPartnerResetPassword from './pages/DeliveryPartnerResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import CustomerMenu from './pages/CustomerMenu';
 import CustomerOrders from './pages/CustomerOrders';
@@ -56,8 +58,11 @@ function App() {
         <Routes>
           {/* Public Authentication & Invitation routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/delivery-partner/login" element={<Login initialRole="delivery_partner" />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/delivery-partner/forgot-password" element={<DeliveryPartnerForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/delivery-partner/reset-password" element={<DeliveryPartnerResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/invitation/:token" element={<AcceptInvitation />} />
 

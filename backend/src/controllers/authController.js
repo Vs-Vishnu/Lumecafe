@@ -265,7 +265,11 @@ exports.resetPassword = async (req, res, next) => {
 
     user.password = password;
     user.resetPasswordToken = null;
+    user.resetPasswordTokenHash = null;
+    user.resetPasswordOtpHash = null;
     user.resetPasswordExpires = null;
+    user.resetPasswordAttempts = 0;
+    user.passwordChangedAt = new Date();
     await user.save();
 
     res.json({

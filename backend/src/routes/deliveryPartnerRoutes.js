@@ -13,10 +13,24 @@ const {
   updateAvailability,
   updateLocation,
 } = require('../controllers/deliveryPartnerController');
+const {
+  forgotPassword,
+  resetPassword,
+  verifyResetToken,
+} = require('../controllers/deliveryPartnerAuthController');
+const {
+  forgotPasswordLimiter,
+  resetPasswordLimiter,
+} = require('../middleware/rateLimiter');
 const { protect } = require('../middleware/auth');
 const { restrictTo } = require('../middleware/role');
 
-// All delivery partner routes protected and restricted to delivery_partner role
+// Public Delivery Partner Auth routes (password recovery and reset)
+router.post('/auth/forgot-password', forgotPasswordLimiter, forgotPassword);
+router.post('/auth/reset-password', resetPasswordLimiter, resetPassword);
+router.get('/auth/verify-token', verifyResetToken);
+
+// All subsequent delivery partner routes are protected and restricted to delivery_partner role
 router.use(protect);
 router.use(restrictTo('delivery_partner'));
 

@@ -16,6 +16,13 @@ const protect = async (req, res, next) => {
       if (req.user.status === 'inactive') {
         return res.status(403).json({ success: false, message: 'Your account is inactive. Please contact the administrator.' });
       }
+
+      if (req.user.changedPasswordAfter && req.user.changedPasswordAfter(decoded.iat)) {
+        return res.status(401).json({
+          success: false,
+          message: 'Password was recently updated. Please log in again with your new credentials.',
+        });
+      }
       
       next();
     } catch (error) {

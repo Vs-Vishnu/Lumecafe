@@ -9,17 +9,26 @@ const createTransporter = () => {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
+  const service = process.env.SMTP_SERVICE;
 
-  if (host && user && pass) {
-    return nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: {
-        user,
-        pass,
-      },
-    });
+  if ((host || service) && user && pass) {
+    const transportOptions = {
+      auth: { user, pass },
+    };
+
+    if (service) {
+      transportOptions.service = service;
+    } else {
+      transportOptions.host = host;
+      transportOptions.port = port;
+      transportOptions.secure = process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : port === 465;
+    }
+
+    if (process.env.SMTP_IGNORE_TLS === 'true') {
+      transportOptions.tls = { rejectUnauthorized: false };
+    }
+
+    return nodemailer.createTransport(transportOptions);
   }
 
   // Fallback to test/console logger
@@ -30,7 +39,7 @@ const createTransporter = () => {
  * Core sendEmail function
  */
 const sendEmail = async ({ to, subject, html, text }) => {
-  const from = process.env.EMAIL_FROM || '"LumeBills Delivery Platform" <no-reply@lumebills.com>';
+  const from = process.env.EMAIL_FROM || '"LumeCafe Delivery" <no-reply@lumecafe.com>';
   const emailRecord = {
     to,
     from,
@@ -256,6 +265,91 @@ const sendPasswordResetEmail = async ({ to, name, token }) => {
 };
 
 /**
+ * 4b. Delivery Partner Password Reset Email with LumeCafe Branding, Reset Link, and 6-Digit OTP
+ */
+const sendDeliveryPartnerPasswordResetEmail = async ({ to, name, token, otp, expiresMinutes = 15 }) => {
+  const appUrl = process.env.APP_URL || 'http://localhost:5173';
+  const resetLink = `${appUrl}/delivery-partner/reset-password?token=${token}`;
+
+  const html = wrapEmailTemplate(
+    'Reset Your LumeCafe Delivery Partner Password',
+    `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="display: inline-block; padding: 6px 16px; background: #ecfdf5; color: #047857; font-size: 12px; font-weight: 800; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #a7f3d0;">
+          🛵 Delivery Partner Security
+        </span>
+      </div>
+
+      <h2 style="color: #111827; margin-top: 0; font-size: 20px; text-align: center;">Reset Your Password</h2>
+      <p style="font-size: 15px; color: #374151;">Hello <strong>${name || 'Delivery Partner'}</strong>,</p>
+      <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
+        We received a request to reset your password for your <strong>LumeCafe Delivery Partner</strong> account. You can securely reset your credentials using either of the two options below:
+      </p>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        <p style="font-size: 13px; font-weight: 700; color: #475569; text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px;">
+          Option 1: One-Click Reset Link
+        </p>
+        <a href="${resetLink}" class="button" style="margin: 8px 0; display: inline-block; background-color: #10B981; color: #ffffff !important; padding: 12px 28px; border-radius: 10px; font-weight: bold; text-decoration: none;">Reset Password Now</a>
+        <p style="font-size: 11px; color: #94a3b8; margin: 10px 0 0 0; word-break: break-all;">
+          Or copy link: <a href="${resetLink}" style="color: #10b981;">${resetLink}</a>
+        </p>
+      </div>
+
+      <div style="background: #fdf4ff; border: 1px dashed #d946ef; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        <p style="font-size: 13px; font-weight: 700; color: #86198f; text-transform: uppercase; margin: 0 0 6px 0; letter-spacing: 0.5px;">
+          Option 2: 6-Digit Verification Code (OTP)
+        </p>
+        <p style="font-size: 13px; color: #701a75; margin: 0 0 12px 0;">Enter this code on the password reset screen:</p>
+        <div style="font-size: 32px; letter-spacing: 8px; font-weight: 800; color: #a21caf; background: #ffffff; padding: 12px 24px; border-radius: 10px; display: inline-block; font-family: monospace; border: 2px solid #f0abfc; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          ${otp}
+        </div>
+      </div>
+
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin: 24px 0;">
+        <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+          ⏱️ <strong>Expiration Notice:</strong> This reset link and 6-digit OTP will expire in <strong>${expiresMinutes} minutes</strong>.
+        </p>
+        <p style="margin: 8px 0 0 0; font-size: 13px; color: #b45309; line-height: 1.5;">
+          🔒 <strong>Security Warning:</strong> Never share your verification code or link with anyone. LumeCafe staff and dispatchers will never ask for your password or OTP.
+        </p>
+      </div>
+
+      <p style="font-size: 12px; color: #6b7280; margin-top: 24px; line-height: 1.5;">
+        If you did not request this password reset, please ignore this email. Your current password remains secure and your account is protected.
+      </p>
+    `
+  );
+
+  const text = `
+LumeCafe Delivery Partner - Password Reset Request
+
+Hello ${name || 'Delivery Partner'},
+
+We received a request to reset your password for your LumeCafe Delivery Partner account.
+
+Option 1: Reset via Link
+Open this secure link: ${resetLink}
+
+Option 2: Enter 6-Digit OTP
+Use this single-use code: ${otp}
+
+Expiration: This link and code expire in ${expiresMinutes} minutes.
+
+Security Warning: Never share this link or OTP with anyone. LumeCafe staff will never ask for your reset code.
+
+If you did not request this, you can safely ignore this email.
+`;
+
+  return sendEmail({
+    to,
+    subject: 'Password Reset Request - LumeCafe Delivery Partner',
+    html,
+    text,
+  });
+};
+
+/**
  * 5. Customer Order Confirmation Email
  */
 const sendOrderConfirmationEmail = async ({ to, order }) => {
@@ -401,6 +495,7 @@ module.exports = {
   sendDeliveryInvitationAcceptedEmail,
   sendEmailVerificationEmail,
   sendPasswordResetEmail,
+  sendDeliveryPartnerPasswordResetEmail,
   sendOrderConfirmationEmail,
   sendOrderStatusNotificationEmail,
   sendAssignmentNotificationEmail,

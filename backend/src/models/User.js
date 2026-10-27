@@ -50,7 +50,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    resetPasswordTokenHash: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    resetPasswordOtpHash: {
+      type: String,
+      default: null,
+      index: true,
+    },
     resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
+    resetPasswordAttempts: {
+      type: Number,
+      default: 0,
+    },
+    passwordChangedAt: {
       type: Date,
       default: null,
     },
@@ -84,6 +102,15 @@ userSchema.pre('save', async function (next) {
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Check if password was changed after JWT was issued
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
 };
 
 module.exports = mongoose.model('User', userSchema);
