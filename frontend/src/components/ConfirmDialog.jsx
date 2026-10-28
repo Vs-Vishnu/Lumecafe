@@ -12,11 +12,11 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <div className="space-y-4">
-        <p className="text-sm text-gray-600 leading-relaxed">{message}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{message}</p>
         <div className="flex justify-end gap-3 pt-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 cursor-pointer"
           >
             Cancel
           </button>
@@ -25,7 +25,7 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
               onConfirm();
               onClose();
             }}
-            className={`px-4 py-2 text-sm font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 ${btnColors[type]}`}
+            className={`px-4 py-2 text-sm font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 cursor-pointer ${btnColors[type]}`}
           >
             {confirmText}
           </button>

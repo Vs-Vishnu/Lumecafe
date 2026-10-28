@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, Shield } from 'lucide-react';
+import { User, Mail, Lock, Shield, Palette } from 'lucide-react';
 import Toast from '../components/Toast';
+import ThemeToggle from '../components/ThemeToggle';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();

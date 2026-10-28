@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './layouts/MainLayout';
 
@@ -54,73 +55,75 @@ const HomeRedirect = () => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
-          {/* Public Authentication & Invitation routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/delivery-partner/login" element={<Login initialRole="delivery_partner" />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/delivery-partner/forgot-password" element={<DeliveryPartnerForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/delivery-partner/reset-password" element={<DeliveryPartnerResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/invitation/:token" element={<AcceptInvitation />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
+            {/* Public Authentication & Invitation routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/delivery-partner/login" element={<Login initialRole="delivery_partner" />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/delivery-partner/forgot-password" element={<DeliveryPartnerForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/delivery-partner/reset-password" element={<DeliveryPartnerResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/invitation/:token" element={<AcceptInvitation />} />
 
-          {/* Customer Portal Protected Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
-            <Route element={<MainLayout />}>
-              <Route path="/menu" element={<CustomerMenu />} />
-              <Route path="/my-orders" element={<CustomerOrders />} />
-              <Route path="/track-order/:id" element={<TrackOrder />} />
-              <Route path="/addresses" element={<CustomerAddresses />} />
+            {/* Customer Portal Protected Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
+              <Route element={<MainLayout />}>
+                <Route path="/menu" element={<CustomerMenu />} />
+                <Route path="/my-orders" element={<CustomerOrders />} />
+                <Route path="/track-order/:id" element={<TrackOrder />} />
+                <Route path="/addresses" element={<CustomerAddresses />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Delivery Partner Protected Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['delivery_partner', 'admin']} />}>
-            <Route element={<MainLayout />}>
-              <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+            {/* Delivery Partner Protected Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['delivery_partner', 'admin']} />}>
+              <Route element={<MainLayout />}>
+                <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* In-Store POS Protected Routes (Cashier and Admin) */}
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'cashier']} />}>
-            <Route element={<MainLayout />}>
-              <Route path="/billing" element={<Billing />} />
+            {/* In-Store POS Protected Routes (Cashier and Admin) */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'cashier']} />}>
+              <Route element={<MainLayout />}>
+                <Route path="/billing" element={<Billing />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Shared User Profile Route */}
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'cashier', 'delivery_partner', 'customer']} />}>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<HomeRedirect />} />
-              <Route path="/profile" element={<Profile />} />
+            {/* Shared User Profile Route */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'cashier', 'delivery_partner', 'customer']} />}>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<HomeRedirect />} />
+                <Route path="/profile" element={<Profile />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Administrator Exclusive Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/inventory" element={<Inventory />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/admin/delivery-partners" element={<AdminDeliveryPartners />} />
-              <Route path="/admin/delivery-assignments" element={<AdminDeliveryAssignments />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/settings/ai-insights" element={<Settings initialTab="ai-insights" />} />
+            {/* Administrator Exclusive Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route element={<MainLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/inventory" element={<Inventory />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/admin/delivery-partners" element={<AdminDeliveryPartners />} />
+                <Route path="/admin/delivery-assignments" element={<AdminDeliveryAssignments />} />
+                <Route path="/expenses" element={<Expenses />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/users" element={<Users />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/settings/ai-insights" element={<Settings initialTab="ai-insights" />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Redirect all unmatched routes */}
-          <Route path="*" element={<HomeRedirect />} />
-        </Routes>
-      </AuthProvider>
+            {/* Redirect all unmatched routes */}
+            <Route path="*" element={<HomeRedirect />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

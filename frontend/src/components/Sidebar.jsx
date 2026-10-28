@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import ThemeToggle from './ThemeToggle';
 import {
   LayoutDashboard,
   Receipt,
@@ -89,26 +90,26 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   ];
 
   const activeStyle = 'bg-brand text-white shadow-lg shadow-brand/20';
-  const inactiveStyle = 'text-gray-600 hover:bg-green-50 hover:text-brand';
+  const inactiveStyle = 'text-gray-600 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-gray-800/80 hover:text-brand dark:hover:text-emerald-400';
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white border-r border-gray-100 font-sans">
+    <div className="flex flex-col h-full bg-white dark:bg-[#121824] border-r border-gray-100 dark:border-gray-800 font-sans transition-colors duration-200">
       {/* Brand logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 flex-shrink-0">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
         {settings?.logo ? (
-          <img src={settings.logo} alt="Logo" className="w-10 h-10 object-contain rounded-xl shadow-md border border-gray-100" />
+          <img src={settings.logo} alt="Logo" className="w-10 h-10 object-contain rounded-xl shadow-md border border-gray-100 dark:border-gray-700" />
         ) : (
           <div className="flex items-center justify-center w-10 h-10 bg-brand text-white rounded-xl font-display font-black text-xl shadow-md shadow-brand/35">
             {settings?.businessName?.charAt(0).toUpperCase() || 'L'}
           </div>
         )}
         <div className="overflow-hidden">
-          <span className="text-xl font-extrabold text-gray-900 font-display tracking-tight leading-none block truncate" title={settings?.businessName || 'LumeBills'}>
+          <span className="text-xl font-extrabold text-gray-900 dark:text-white font-display tracking-tight leading-none block truncate" title={settings?.businessName || 'LumeBills'}>
             {settings?.businessName || (
               <>Lume<span className="text-brand">Bills</span></>
             )}
           </span>
-          <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest block mt-0.5 truncate" title={settings?.tagline || 'Fast • Simple • Accurate'}>
+          <span className="text-[9px] font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-widest block mt-0.5 truncate" title={settings?.tagline || 'Fast • Simple • Accurate'}>
             {settings?.tagline || 'Fast • Simple • Accurate'}
           </span>
         </div>
@@ -117,7 +118,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       {/* Main navigation */}
       <div className="flex-grow overflow-y-auto px-4 py-4 space-y-7">
         <div>
-          <span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
+          <span className="px-3 text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider block mb-2">
             {user?.role === 'customer' ? 'Customer Portal' : user?.role === 'delivery_partner' ? 'Driver Console' : 'Main Menu'}
           </span>
           <nav className="space-y-1">
@@ -141,7 +142,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         {user?.role === 'admin' && (
           <div>
-            <span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
+            <span className="px-3 text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider block mb-2">
               Administration
             </span>
             <nav className="space-y-1">
@@ -166,16 +167,23 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       </div>
 
       {/* User profile & footer */}
-      <div className="p-4 border-t border-gray-100 flex-shrink-0 bg-gray-50/50">
-        <div className="flex items-center gap-3 p-2 mb-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-accent-light text-accent font-bold text-base border border-accent/20">
+      <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50/50 dark:bg-gray-800/40">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+            Appearance
+          </span>
+          <ThemeToggle variant="segmented" showLabels={false} />
+        </div>
+
+        <div className="flex items-center gap-3 p-2 mb-3 bg-white dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700/60">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-accent-light dark:bg-amber-950/40 text-accent font-bold text-base border border-accent/20">
             {user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="overflow-hidden">
-            <h4 className="text-sm font-bold text-gray-900 truncate leading-tight">
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">
               {user?.name || 'Loading...'}
             </h4>
-            <span className="text-[11px] font-semibold text-gray-500 capitalize">
+            <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 capitalize">
               {user?.role || 'Guest'}
             </span>
           </div>
@@ -185,14 +193,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <Link
             to="/profile"
             onClick={() => toggleSidebar(false)}
-            className="flex-grow flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 bg-white hover:bg-gray-100 transition-colors"
+            className="flex-grow flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <User className="w-3.5 h-3.5" />
             Profile
           </Link>
           <button
             onClick={handleLogout}
-            className="px-3 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+            className="px-3 py-2.5 rounded-xl border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
             title="Log Out"
           >
             <LogOut className="w-4 h-4" />
@@ -217,13 +225,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           onClick={() => toggleSidebar(false)}
         ></div>
 
         {/* Sidebar Drawer */}
         <aside
-          className={`absolute inset-y-0 left-0 w-64 bg-white transition-transform duration-300 transform ${
+          className={`absolute inset-y-0 left-0 w-64 bg-white dark:bg-[#121824] transition-transform duration-300 transform ${
             isOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >

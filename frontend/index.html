@@ -7,6 +7,25 @@
     <meta name="description" content="LumeBills - Modern production-ready POS and billing management software for food, retail, and restaurant businesses." />
     <title>LumeBills - Fast. Simple. Accurate.</title>
 
+    <!-- Prevent flash of wrong theme before React loads -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('lumecafe_theme') || localStorage.getItem('lumebills_theme');
+          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = stored === 'dark' || ((!stored || stored === 'system') && systemDark);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.colorScheme = 'light';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
